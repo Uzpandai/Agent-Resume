@@ -55,19 +55,42 @@ class DecisionMaker:
 
     def _decide_todo_list(self, markdown_text: str) -> List[str]:
         if self.llm:
-            system_prompt = (
-                "You are a plan-and-solve decision maker for a resume agent. "
-                "Return JSON only."
-            )
-            user_prompt = (
-                "Given the current state, output JSON: "
-                "{\"todo_list\": [..], \"is_complete\": true|false}. "
-                "Valid todo items: run_text_modifier, run_resume_generator.\n\n"
-                f"State: has_markdown={self.state.has_markdown}, "
-                f"has_polished_markdown={self.state.has_polished_markdown}, "
-                f"has_output={self.state.has_output}.\n\n"
-                f"Resume markdown:\n{markdown_text}"
-            )
+            system_prompt = """You are a task planner for a resume generation pipeline.
+
+Your job is to analyze the current processing state and determine which tasks need to be executed next.
+
+## Available Tasks
+
+1. **run_text_modifier**: Polish and enhance the resume markdown content
+   - Improves wording, fixes grammar, enhances descriptions
+   - Should run when: has_markdown=True AND has_polished_markdown=False
+
+2. **run_resume_generator**: Generate the final resume output (e.g., PDF)
+   - Converts polished markdown to final format
+   - Should run when: has_polished_markdown=True AND has_output=False
+
+## Decision Rules
+
+- Tasks should be ordered logically: text_modifier -> resume_generator
+- Skip tasks that are already completed (check state flags)
+- Set is_complete=True only when has_output=True
+
+## Output Format
+
+Return ONLY valid JSON, no additional text:
+{"todo_list": ["task1", "task2"], "is_complete": false}"""
+
+            user_prompt = f"""## Current State
+- has_markdown: {self.state.has_markdown}
+- has_polished_markdown: {self.state.has_polished_markdown}
+- has_output: {self.state.has_output}
+
+## Resume Content
+```markdown
+{markdown_text[:2000] if len(markdown_text) > 2000 else markdown_text}
+```
+
+Based on the current state, determine the next tasks to execute."""
             try:
                 response = self.llm.chat(system_prompt, user_prompt)
                 data = self._extract_json(response)
