@@ -1,0 +1,13 @@
+# Agent Resume 依赖
+python-dotenv>=1.0.0
+python-docx>=1.1.0
+beautifulsoup4>=4.12.0
+requests>=2.31.0  # HTTP 请求（用于调用 Magic Resume API）
+
+# PDF 生成（按优先级）
+# 1. Magic Resume API - 默认使用，无需额外依赖
+# 2. pyppeteer - 本地 Chrome 渲染
+pyppeteer>=2.0.0
+
+# 可选依赖
+# weasyprint>=60.0  # 需要系统安装 pango, cairo 等

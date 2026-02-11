@@ -39,7 +39,7 @@ def main() -> None:
 
     polished = markdown
     if "run_text_modifier" in todo:
-        modifier = TextModifier()
+        modifier = TextModifier(llm_client=llm_client)
         polished = modifier.run(
             ModifyRequest(
                 markdown_text=markdown,

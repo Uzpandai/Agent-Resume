@@ -4,7 +4,19 @@ import json
 import os
 import urllib.request
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Optional
+
+# 尝试加载 .env 文件
+try:
+    from dotenv import load_dotenv
+    # 查找项目根目录的 .env 文件
+    env_path = Path(__file__).parent.parent / ".env"
+    if env_path.exists():
+        load_dotenv(env_path)
+except ImportError:
+    # python-dotenv 未安装，跳过
+    pass
 
 
 @dataclass
